@@ -1,0 +1,74 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+*_Scaffold.cshtml
+
+# User-specific files
+*.user
+*.suo
+*.userprefs
+*.pfx
+*.publishsettings
+
+# Visual Studio files
+.vs/
+*.opendb
+*.tlog
+*.log
+
+# NuGet
+.nuget/NuGet.exe
+NuGet.config
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+*.coverage
+*.coveragexml
+
+# Code coverage
+*.coverage
+*.coveragexml
+coverage/
+
+# User's specific environment
+.env
+*.env
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rider/IDE files
+.idea/
+*.sln.iml
+.idea/{workspace}.xml
+
+# Docker
+.dockerignore
+
+# SQL Server data (if using volumes locally)
+*.mdf
+*.ldf
+
+# Secret files
+secrets.json
+appsettings.secrets.json
