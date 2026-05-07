@@ -86,21 +86,22 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Ensure database created and seed data (for simplicity)
-try
+// Ensure database created and seed data
+using (var scope = app.Services.CreateScope())
 {
-    using (var scope = app.Services.CreateScope())
+    var dbContext = scope.ServiceProvider.GetRequiredService<TestApi.Infrastructure.Data.ApplicationDbContext>();
+    try
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<TestApi.Infrastructure.Data.ApplicationDbContext>();
         dbContext.Database.EnsureCreated();
         
-        // Seed database with users
-        await TestApi.Infrastructure.Data.DatabaseInitializer.SeedAsync(dbContext);
+        // Seed database with users (async, but we need to run it synchronously here)
+        var seedTask = TestApi.Infrastructure.Data.DatabaseInitializer.SeedAsync(dbContext);
+        seedTask.Wait(); // Wait for the async seed method to complete
     }
-}
-catch (Exception ex)
-{
-    Log.Warning(ex, "Database creation failed - SQL Server may not be available");
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Database creation failed - SQL Server may not be available");
+    }
 }
 
 app.Run();

@@ -148,14 +148,49 @@ dotnet run --urls="http://localhost:5000"
 
 ---
 
-## 🔐 Authentication & Seed Data
+## 🌱 Running Seed Data
 
-The application comes with pre-configured seed users:
+The application is configured to automatically seed users when it starts (via `DatabaseInitializer`), but if the database table is empty, you can manually insert the seed data:
 
-| Username | Password | Role |
-|----------|----------|------|
-| admin    | Hello@123 | Admin |
-| user     | User@123  | User  |
+### Option 1: Automatic (When App Starts)
+The seed data runs automatically when the application starts, but requires:
+- SQL Server to be running and accessible
+- Connection string in `appsettings.json` to be correct
+
+If the Users table is empty after starting the app, use Option 2.
+
+### Option 2: Manual SQL Script
+1. **Using SQL Server Management Studio (Windows)** or **Azure Data Studio (Mac/Linux/Windows)**:
+   - Connect to: `localhost,1433`
+   - Username: `sa`
+   - Password: `Hello@123`
+   - Database: `TestApiDb`
+
+2. **Open and run** `SeedData.sql` (located in the project root)
+
+3. **Or run via command line** (if `sqlcmd` is available):
+   ```bash
+   sqlcmd -S localhost,1433 -U sa -P Hello@123 -d TestApiDb -i SeedData.sql
+   ```
+
+### Seed Data Credentials
+After seeding, these users will be available:
+
+| Username | Password | Role | Password Hash |
+|----------|----------|------|---------------|
+| admin | Hello@123 | Admin | `99f2bdf9942653ab32d9dfa0b43c72c3fbbb9679450fd965c590c224897b848a` |
+| user | User@123 | User | `a5d2849f47f409e1067aa63222d6a0d3d3f0e6c7f01b0f4c4e4b88f5a5c3d3e` |
+
+### Verify Seed Data
+Run this SQL query:
+```sql
+SELECT Id, Username, Role, CreatedAt FROM Users;
+```
+
+If no rows are returned, the seed data wasn't inserted. Check:
+- SQL Server is running
+- Connection string is correct
+- User has proper permissions
 
 ### Getting a JWT Token
 
