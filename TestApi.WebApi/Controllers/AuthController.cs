@@ -16,13 +16,13 @@ public class AuthController : ControllerBase
 {
     private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _context;
-    
+
     public AuthController(IConfiguration configuration, ApplicationDbContext context)
     {
         _configuration = configuration;
         _context = context;
     }
-    
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
@@ -81,7 +81,46 @@ public class AuthController : ControllerBase
         var token = GenerateJwtToken(user.Username, user.Role);
         return Ok(new { token, username = user.Username, role = user.Role });
     }
-    
+
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var username = User.FindFirst(ClaimTypes.Name)?.Value;
+        if (string.IsNullOrEmpty(username))
+            return Unauthorized();
+
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+        if (user == null)
+            return NotFound(new { message = "User not found" });
+
+        // Verify current password
+        var currentHash = Convert.ToBase64String(
+            System.Security.Cryptography.SHA256.Create()
+            .ComputeHash(System.Text.Encoding.UTF8.GetBytes(dto.CurrentPassword))
+        );
+
+        if (user.PasswordHash != currentHash)
+            return BadRequest(new { message = "Current password is incorrect" });
+
+        // Validate new password
+        if (dto.NewPassword.Length < 6)
+            return BadRequest(new { message = "New password must be at least 6 characters" });
+
+        if (dto.NewPassword != dto.ConfirmPassword)
+            return BadRequest(new { message = "New passwords do not match" });
+
+        // Update password
+        user.PasswordHash = Convert.ToBase64String(
+            System.Security.Cryptography.SHA256.Create()
+            .ComputeHash(System.Text.Encoding.UTF8.GetBytes(dto.NewPassword))
+        );
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Password changed successfully" });
+    }
+
     private string GenerateJwtToken(string username, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -108,4 +147,11 @@ public class LoginDto
 {
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+}
+
+public class ChangePasswordDto
+{
+    public string CurrentPassword { get; set; } = string.Empty;
+    public string NewPassword { get; set; } = string.Empty;
+    public string ConfirmPassword { get; set; } = string.Empty;
 }
