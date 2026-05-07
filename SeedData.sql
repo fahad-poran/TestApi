@@ -18,12 +18,14 @@ GO
 IF NOT EXISTS (SELECT TOP 1 * FROM Users)
 BEGIN
     -- Admin user (password: Hello@123)
+    -- Hash: SHA256("Hello@123") -> Base64
     INSERT INTO Users (Username, PasswordHash, Role, CreatedAt) 
-    VALUES ('admin', '99f2bdf9942653ab32d9dfa0b43c72c3fbbb9679450fd965c590c224897b848a', 'Admin', GETUTCDATE());
+    VALUES ('admin', 'mfK9+ZQmU6sy2d+gtDxyw/u7lnlFD9llxZDCJIl7hIo=', 'Admin', GETUTCDATE());
     
     -- Regular user (password: User@123)
+    -- Hash: SHA256("User@123") -> Base64
     INSERT INTO Users (Username, PasswordHash, Role, CreatedAt) 
-    VALUES ('user', 'a5d2849f47f409e1067aa63222d6a0d3d3f0e6c7f01b0f4c4e4b88f5a5c3d3e', 'User', GETUTCDATE());
+    VALUES ('user', 'PnwZV2SIhigW8TtRLKzz5LqX3ZckPqC9airRZC2GunI=', 'User', GETUTCDATE());
     
     PRINT 'Seed data inserted successfully!';
 END

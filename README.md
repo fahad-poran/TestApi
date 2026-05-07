@@ -178,8 +178,8 @@ After seeding, these users will be available:
 
 | Username | Password | Role | Password Hash |
 |----------|----------|------|---------------|
-| admin | Hello@123 | Admin | `99f2bdf9942653ab32d9dfa0b43c72c3fbbb9679450fd965c590c224897b848a` |
-| user | User@123 | User | `a5d2849f47f409e1067aa63222d6a0d3d3f0e6c7f01b0f4c4e4b88f5a5c3d3e` |
+| admin | Hello@123 | Admin | `mfK9+ZQmU6sy2d+gtDxyw/u7lnlFD9llxZDCJIl7hIo=` |
+| user | User@123 | User | `PnwZV2SIhigW8TtRLKzz5LqX3ZckPqC9airRZC2GunI=` |
 
 ### Verify Seed Data
 Run this SQL query:
