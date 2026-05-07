@@ -86,13 +86,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Ensure database created (for simplicity)
+// Ensure database created and seed data (for simplicity)
 try
 {
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<TestApi.Infrastructure.Data.ApplicationDbContext>();
         dbContext.Database.EnsureCreated();
+        
+        // Seed database with users
+        await TestApi.Infrastructure.Data.DatabaseInitializer.SeedAsync(dbContext);
     }
 }
 catch (Exception ex)
