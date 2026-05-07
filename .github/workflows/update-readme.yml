@@ -1,0 +1,58 @@
+name: Update README on Deploy
+
+on:
+  push:
+    branches: [ master, main ]
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Get Build Info
+        id: build-info
+        run: |
+          echo "BUILD_DATE=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "COMMIT_MSG<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: Update README Badges
+        run: |
+          # Add dynamic badges to README if not present
+          if ! grep -q "build-status-badge" README.md; then
+            sed -i '1s/^/![Build Status](https://github.com/fahad-poran/TestApi/actions/workflows/Update%20README%20on%20Deploy/badge.svg?branch=master\)\n/' README.md
+          fi
+      
+      - name: Add Auto-Update Footer
+        run: |
+          # Remove old auto-update section
+          sed -i '/<!-- AUTO-UPDATE-START -->/,<!-- AUTO-UPDATE-END -->/d' README.md
+          
+          # Add new auto-update section
+          cat >> README.md << 'EOF'
+          
+          <!-- AUTO-UPDATE-START -->
+          ## 🔄 Auto-Updated Info
+          
+          - **Last Deploy**: ${{ steps.build-info.outputs.BUILD_DATE }}
+          - **Commit**: `${{ steps.build-info.outputs.COMMIT_SHA }}`
+          - **Message**: ${{ steps.build-info.outputs.COMMIT_MSG }}
+          - **API Status**: [![API](http://localhost:5001/health)](http://localhost:5001)
+          - **Frontend**: [![Frontend](http://localhost:5173)](http://localhost:5173)
+          
+          > 🤖 This section is automatically updated on every push to master.
+          <!-- AUTO-UPDATE-END -->
+          EOF
+      
+      - name: Commit & Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 Auto-update README with latest deploy info"
+          file_pattern: 'README.md'
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
