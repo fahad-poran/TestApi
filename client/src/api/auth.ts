@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5001/api';
+// const API_URL = 'http://localhost:5001/api';
+
+ const API_URL = 'http://localhost:5149/api';
 
 export interface LoginRequest {
   username: string;
@@ -18,5 +20,9 @@ export const login = async (credentials: LoginRequest): Promise<LoginResponse> =
   });
   
   if (!response.ok) throw new Error('Login failed');
-  return response.json();
+  const data = await response.json();
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('role', data.role);
+  localStorage.setItem('username', data.username);
+  return data;
 };
