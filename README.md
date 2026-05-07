@@ -342,3 +342,62 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Created by**: Fahad  
 **Last Updated**: May 2026
+
+## 📊 Test Results (May 2026)
+
+### ✅ Login Test (Success)
+```bash
+curl -X POST http://localhost:5001/api/Auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "Hello@123"}'
+```
+
+**Result:** ✅ JWT Token generated successfully!
+```json
+{
+  "token": "eyJhbGci...",
+  "username": "admin",
+  "role": "Admin"
+}
+```
+
+### ✅ Product Creation Test (Success)
+After connecting to SQL Server on host machine (using `host.docker.internal`):
+
+```bash
+# Create Product 1: Dell XPS 15
+curl -X POST http://localhost:5001/api/Products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Dell XPS 15", "price": 1299.99}'
+# Result: ✅ Created (ID: 1)
+
+# Create Product 2: iPhone 15 Pro
+curl -X POST http://localhost:5001/api/Products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "iPhone 15 Pro", "price": 999.99}'
+# Result: ✅ Created (ID: 2)
+
+# Create Product 3: iPad Air M2
+curl -X POST http://localhost:5001/api/Products \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "iPad Air M2", "price": 599.99}'
+# Result: ✅ Created (ID: 3)
+```
+
+### ✅ Get All Products
+```bash
+curl http://localhost:5001/api/Products \
+  -H "Authorization: Bearer <token>"
+```
+
+**Result:** Returns all 3 products in JSON format ✅
+
+### 🔑 Key Success Factors
+1. **Connection string for host SQL Server**: Use `Server=host.docker.internal,1433` (not localhost)
+2. **Fallback authentication**: AuthController falls back to hardcoded credentials when DB is unavailable
+3. **SQL Server on host**: Running SQL Server on Windows host machine, accessible from WSL/Docker via `host.docker.internal`
+
+---
