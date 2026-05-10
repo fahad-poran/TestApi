@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TestApi.Application.DTOs;
 using TestApi.Application.Interfaces;
+using TestApi.Domain.Entities;
+using TestApi.Infrastructure.Data;
 
 namespace TestApi.WebApi.Controllers;
 
@@ -11,10 +14,12 @@ namespace TestApi.WebApi.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
+    private readonly ApplicationDbContext _context;
     
-    public ProductsController(IProductService productService)
+    public ProductsController(IProductService productService, ApplicationDbContext context)
     {
         _productService = productService;
+        _context = context;
     }
     
     [HttpGet]
@@ -38,6 +43,18 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> Create(CreateProductDto dto)
     {
         var product = await _productService.CreateProductAsync(dto);
+
+        // Auto-create stock entry for the new product
+        var stock = new Stock
+        {
+            ProductId = product.Id,
+            Quantity = dto.InitialStock,
+            ReorderLevel = 10,
+            LastUpdated = DateTime.UtcNow
+        };
+        _context.Stocks.Add(stock);
+        await _context.SaveChangesAsync();
+
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
     }
     

@@ -5,6 +5,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 using TestApi.Domain.Entities;
 using TestApi.Infrastructure.Data;
+using TestApi.Application.DTOs;
 
 namespace TestApi.WebApi.Controllers
 {
@@ -54,24 +55,40 @@ namespace TestApi.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Invoice>> CreateInvoice(Invoice invoice)
+        public async Task<ActionResult<Invoice>> CreateInvoice(CreateInvoiceDto createDto)
         {
             var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
-            invoice.UserId = userId;
-            invoice.CreatedAt = DateTime.UtcNow;
-            invoice.InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..4].ToUpper()}";
+            
+            var invoice = new Invoice
+            {
+                UserId = userId,
+                CustomerName = createDto.CustomerName,
+                CustomerPhone = createDto.CustomerPhone,
+                CreatedAt = DateTime.UtcNow,
+                InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString()[..4].ToUpper()}",
+                InvoiceItems = new List<InvoiceItem>()
+            };
 
             // Update stock
-            foreach (var item in invoice.InvoiceItems)
+            foreach (var itemDto in createDto.InvoiceItems)
             {
-                var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.ProductId == item.ProductId);
-                if (stock == null || stock.Quantity < item.Quantity)
-                    return BadRequest($"Insufficient stock for product {item.ProductId}");
+                var stock = await _context.Stocks.FirstOrDefaultAsync(s => s.ProductId == itemDto.ProductId);
+                if (stock == null || stock.Quantity < itemDto.Quantity)
+                    return BadRequest($"Insufficient stock for product {itemDto.ProductId}");
                 
-                stock.Quantity -= item.Quantity;
+                stock.Quantity -= itemDto.Quantity;
                 stock.LastUpdated = DateTime.UtcNow;
-                item.UnitPrice = (await _context.Products.FindAsync(item.ProductId))?.Price ?? 0;
-                item.Subtotal = item.UnitPrice * item.Quantity;
+                
+                var product = await _context.Products.FindAsync(itemDto.ProductId);
+                var unitPrice = product?.Price ?? 0;
+                
+                invoice.InvoiceItems.Add(new InvoiceItem
+                {
+                    ProductId = itemDto.ProductId,
+                    Quantity = itemDto.Quantity,
+                    UnitPrice = unitPrice,
+                    Subtotal = unitPrice * itemDto.Quantity
+                });
             }
 
             invoice.TotalAmount = invoice.InvoiceItems.Sum(ii => ii.Subtotal);

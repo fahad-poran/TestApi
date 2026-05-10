@@ -18,6 +18,16 @@ namespace TestApi.WebApi.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<Stock>>> GetAllStock()
+        {
+            return await _context.Stocks
+                .Include(s => s.Product)
+                .OrderBy(s => s.Product!.Name)
+                .ToListAsync();
+        }
+
         [HttpGet("low-stock")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<Stock>>> GetLowStock()
@@ -38,15 +48,39 @@ namespace TestApi.WebApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateStock(int id, int quantity)
+        public async Task<IActionResult> UpdateStock(int id, [FromBody] UpdateStockDto dto)
         {
             var stock = await _context.Stocks.FindAsync(id);
             if (stock == null) return NotFound();
             
-            stock.Quantity = quantity;
+            stock.Quantity = dto.Quantity;
+            stock.ReorderLevel = dto.ReorderLevel;
             stock.LastUpdated = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
+        [HttpGet("summary")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetStockSummary()
+        {
+            var totalProducts = await _context.Products.CountAsync();
+            var lowStock = await _context.Stocks.CountAsync(s => s.Quantity <= s.ReorderLevel && s.Quantity > 0);
+            var outOfStock = await _context.Stocks.CountAsync(s => s.Quantity == 0);
+            
+            return Ok(new 
+            { 
+                TotalProducts = totalProducts,
+                LowStockCount = lowStock,
+                OutOfStockCount = outOfStock,
+                LastUpdated = DateTime.UtcNow
+            });
+        }
+    }
+
+    public class UpdateStockDto
+    {
+        public int Quantity { get; set; }
+        public int ReorderLevel { get; set; } = 10;
     }
 }

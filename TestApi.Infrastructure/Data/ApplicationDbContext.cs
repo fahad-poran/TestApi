@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Stock> Stocks => Set<Stock>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<InvoiceItem> InvoiceItems => Set<InvoiceItem>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +89,15 @@ public class ApplicationDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(ii => ii.ProductId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Supplier configuration
+        modelBuilder.Entity<Supplier>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.Name).IsRequired().HasMaxLength(200);
+            entity.Property(s => s.Phone).HasMaxLength(20);
+            entity.Property(s => s.Email).HasMaxLength(200);
         });
     }
 }

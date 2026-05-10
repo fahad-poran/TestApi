@@ -9,10 +9,11 @@
 ### 🔐 Core Features
 - **Role-Based Access**: Admin and Staff dashboards with different permissions
 - **Product Management**: CRUD operations with category organization
-- **Stock Tracking**: Real-time stock levels with low-stock alerts
+- **Stock Tracking**: Real-time stock levels with low-stock alerts and Stock Management page
+- **Supplier Management**: Dedicated directory for supplier contacts
 - **Invoice System**: Create invoices, update stock automatically, download PDF reports
 - **Analytics Dashboard**: Sales trends, top products, stock summaries with interactive charts
-- **Modern UI**: Tailwind CSS with gradients, animations, and responsive design
+- **Modern UI**: Tailwind CSS with gradients, animations, responsive design, and unified sidebar navigation
 
 ### 👥 User Roles
 
@@ -50,14 +51,14 @@
 
 ```
 TestApi/
-├── TestApi.Domain/           # Entities (User, Product, Category, Stock, Invoice)
+├── TestApi.Domain/           # Entities (User, Product, Category, Stock, Invoice, Supplier)
 ├── TestApi.Infrastructure/   # EF Core, Migrations, DbContext
 ├── TestApi.WebApi/          # Controllers, JWT Auth, Middleware
 └── client/                   # React frontend (Vite + React + TypeScript)
     ├── src/
-    │   ├── api/             # API services (auth, products, categories, invoices)
-    │   ├── components/       # React components (Login, Products, Dashboards)
-    │   ├── App.tsx          # Main app with role-based routing
+    │   ├── api/             # API services (auth, products, categories, invoices, stock, suppliers)
+    │   ├── components/       # React components (Layout, Sidebar, Login, Products, Dashboards, StockManagement, Suppliers, etc.)
+    │   ├── App.tsx          # Main app with role-based routing and unified layout
     │   └── main.tsx         # Entry point
     ├── package.json
     └── vite.config.ts
@@ -207,28 +208,61 @@ Frontend will be available at: **http://localhost:5173**
    - Enter `admin` / `Hello@123`
    - Redirects to `/admin` dashboard
 
-2. **Create Category** → Use Swagger or API
-   ```bash
-   curl -X POST http://localhost:5001/api/Categories \
-     -H "Content-Type: application/json" \
-     -H "Authorization: Bearer YOUR_TOKEN" \
-     -d '{"name":"Fruits","description":"Fresh fruits"}'
-   ```
+2. **System Navigation** → Use the unified sidebar navigation
+   - Click the hamburger icon to expand/collapse the sidebar
+   - View your current user and role at the top
+   - Access all authorized pages directly from the sidebar
 
-3. **Add Product** → Go to Products page → Click "Add New Product"
-   - Fill in name, price, select category
+3. **Create Category** → Go to Categories page → Click "Add New Category"
+   - Fill in name and description
+   - Click "Add Category"
+
+4. **Add Product** → Go to Products page → Click "Add New Product"
+   - Fill in name, price, select category, and set initial stock
    - Click "Add"
 
-4. **Create Invoice** (as Staff) → Go to Staff Dashboard
+5. **Manage Stock** → Go to Stock Management page
+   - View current stock levels and status indicators (In Stock, Low Stock, Out of Stock)
+   - Click "Edit" to inline update quantity and reorder levels
+   - Filter by stock status to quickly find items needing attention
+
+6. **Manage Suppliers** → Go to Suppliers page
+   - Add, edit, or delete supplier contact details
+   - Search suppliers by name, email, or phone
+
+7. **Create Invoice** (as Staff) → Login as Staff -> Go to Create Invoice
    - Click on products to add them
    - Adjust quantities with +/- buttons
    - Click "Create Invoice"
    - Stock automatically decreases
 
-5. **Download PDF** → After creating invoice:
-   ```bash
-   curl -O -J http://localhost:5001/api/Invoices/pdf/1?token=YOUR_TOKEN
-   ```
+8. **Download PDF** → Go to Invoice History:
+   - Find the newly created invoice
+   - Click "PDF" to generate and download the QuestPDF invoice report
+
+---
+
+## 🧭 System Navigation Guide
+
+The system features a centralized, responsive sidebar for navigation, eliminating the need for standalone navigation bars on each page. The sidebar adapts its links based on the authenticated user's role.
+
+### Admin Navigation
+Admin users have access to all system management features:
+- **Dashboard**: High-level overview, sales trends, top products, and quick stats.
+- **Products**: Manage product catalog, assign categories, and set initial stock levels.
+- **Categories**: Create and organize product categories.
+- **Stock Management**: Monitor inventory levels, update stock quantities, set reorder levels, and view low-stock alerts.
+- **Invoices**: View system-wide invoice history and download PDF receipts.
+- **Suppliers**: Manage supplier contact directory.
+- **Change Password**: Update your account password.
+
+### Staff Navigation
+Staff users have a streamlined interface focused on operations:
+- **Create Invoice**: Point-of-sale style interface to add products, adjust quantities, and generate customer invoices.
+- **Invoice History**: View past invoices and download PDF copies.
+- **Change Password**: Update your account password.
+
+Both roles can easily collapse the sidebar to maximize screen real estate for data tables or point-of-sale activities.
 
 ---
 

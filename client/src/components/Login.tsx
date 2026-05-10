@@ -23,14 +23,17 @@ const Login = () => {
       localStorage.setItem('role', response.role);
       localStorage.setItem('username', response.username);
       
+      // Dispatch storage event to trigger App component re-render
+      window.dispatchEvent(new Event('storage'));
+      
       toast.success('🎉 Login successful! Redirecting...', {
         duration: 2000,
         style: { background: '#10B981', color: '#fff', fontWeight: 'bold' }
       });
       
-      setTimeout(() => {
-        navigate(response.role === 'Admin' ? '/admin' : '/staff');
-      }, 1000);
+      // Navigate to root path to trigger App component re-render with new auth state
+      console.log('Login successful, navigating to root path');
+      navigate('/');
     } catch (err) {
       setError('Invalid username or password');
       toast.error('❌ Login failed. Please check credentials.', {

@@ -24,7 +24,11 @@ builder.Services.AddCors(options =>
 });
 
 // Add services
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -83,11 +87,23 @@ builder.Services.AddApplication();
 
 var app = builder.Build();
 
-// Configure middleware
+// Configure middleware - Exception handling first
+app.UseMiddleware<TestApi.WebApi.Middleware.ExceptionMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+else
+{
+    // For production, you can still enable Swagger but with restrictions
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        c.RoutePrefix = "swagger"; // Access at /swagger
+    });
 }
 
 // Use CORS before auth
@@ -97,6 +113,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
 // Ensure database created and seed data
 using (var scope = app.Services.CreateScope())

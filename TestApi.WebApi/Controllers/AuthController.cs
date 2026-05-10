@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
             {
                 return Ok(new 
                 { 
-                    token = GenerateJwtToken("admin", "Admin"), 
+                    token = GenerateJwtToken(1, "admin", "Admin"), 
                     username = "admin", 
                     role = "Admin" 
                 });
@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
             {
                 return Ok(new 
                 { 
-                    token = GenerateJwtToken("user", "User"), 
+                    token = GenerateJwtToken(2, "user", "User"), 
                     username = "user", 
                     role = "User" 
                 });
@@ -78,7 +78,7 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid username or password" });
         }
         
-        var token = GenerateJwtToken(user.Username, user.Role);
+        var token = GenerateJwtToken(user.Id, user.Username, user.Role);
         return Ok(new { token, username = user.Username, role = user.Role });
     }
 
@@ -121,13 +121,14 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Password changed successfully" });
     }
 
-    private string GenerateJwtToken(string username, string role)
+    private string GenerateJwtToken(int userId, string username, string role)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
         var claims = new[]
         {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
             new Claim(ClaimTypes.Name, username),
             new Claim(ClaimTypes.Role, role)
         };

@@ -22,7 +22,7 @@ export const createInvoice = async (
   invoice: { customerName?: string; invoiceItems: { productId: number; quantity: number }[] },
   token: string
 ): Promise<InvoiceData> => {
-  const response = await fetch('http://localhost:5001/api/Invoices', {
+  const response = await fetch('http://localhost:5149/api/Invoices', {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const createInvoice = async (
 };
 
 export const getInvoices = async (token: string): Promise<InvoiceData[]> => {
-  const response = await fetch('http://localhost:5001/api/Invoices', {
+  const response = await fetch('http://localhost:5149/api/Invoices', {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!response.ok) throw new Error('Failed to fetch invoices');
@@ -43,7 +43,7 @@ export const getInvoices = async (token: string): Promise<InvoiceData[]> => {
 };
 
 export const getInvoice = async (id: number, token: string): Promise<InvoiceData> => {
-  const response = await fetch(`http://localhost:5001/api/Invoices/${id}`, {
+  const response = await fetch(`http://localhost:5149/api/Invoices/${id}`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   if (!response.ok) throw new Error('Failed to fetch invoice');
@@ -51,5 +51,5 @@ export const getInvoice = async (id: number, token: string): Promise<InvoiceData
 };
 
 export const downloadInvoicePdf = (id: number, token: string) => {
-  window.open(`http://localhost:5001/api/Invoices/pdf/${id}?token=${token}`, '_blank');
+  window.open(`http://localhost:5149/api/Invoices/pdf/${id}?token=${token}`, '_blank');
 };
